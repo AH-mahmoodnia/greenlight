@@ -64,5 +64,4 @@ func main() {
 	if err := srv.ListenAndServe(); err != nil {
 		logger.Fatal(err)
 	}
-
 }
