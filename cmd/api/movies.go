@@ -3,7 +3,6 @@ package main
 import (
 	"fmt"
 	"net/http"
-	"strconv"
 )
 
 func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Request) {
@@ -11,7 +10,7 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 }
 
 func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.Atoi(getParam(r, 0))
+	id, err := app.ReadNthIDParam(r, 0)
 	if err != nil {
 		http.NotFound(w, r)
 		return
