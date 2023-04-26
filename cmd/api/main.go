@@ -44,16 +44,10 @@ func main() {
 		config: cfg,
 		logger: logger,
 	}
-
-	//Declare a new router and add a /v1/healthcheck route which dispathes requests
-	//to the healthcheckHandler method.
-	mux := http.NewServeMux()
-	mux.HandleFunc("/v1/healthcheck", app.healthcheckHandler)
-
 	//Decalre a server and fill the fileds with above variables.
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
-		Handler:      mux,
+		Handler:      app.routes(),
 		IdleTimeout:  time.Minute,
 		ReadTimeout:  10 * time.Second,
 		WriteTimeout: 30 * time.Second,
