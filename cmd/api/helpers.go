@@ -6,6 +6,7 @@ import (
 	"strconv"
 )
 
+// Function will get the specified parameter and then convert it into integer and returns that.
 func (app *application) ReadNthIDParam(r *http.Request, index int) (int, error) {
 	param := getParam(r, index)
 	id, err := strconv.Atoi(param)
