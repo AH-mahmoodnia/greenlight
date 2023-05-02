@@ -10,7 +10,7 @@ import (
 func (app *application) healthcheckHandler(w http.ResponseWriter, r *http.Request) {
 	// Create a fixed-format JSON response from a string.
 	js := `{"status": "available", "environment": %q, "version": %q}`
-	fmt.Sprintf(js, app.config.env, version)
+	js = fmt.Sprintf(js, app.config.env, version)
 
 	// Set the Content-Type header to application/json so the
 	// browser will know the type of response is json.
