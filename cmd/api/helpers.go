@@ -17,10 +17,12 @@ func (app *application) ReadNthIDParam(r *http.Request, index int) (int, error) 
 	return id, nil
 }
 
+type envelope map[string]interface{}
+
 // Define a helper function for sending responses.
 // the parameters are the destination w, the HTTP status code, the data which is gonna be
 // encoded, and a header map containing any additional HTTP headers we want to include in the response.
-func (app *application) writeJSON(w http.ResponseWriter, status int, data interface{}, headers http.Header) error {
+func (app *application) writeJSON(w http.ResponseWriter, status int, data envelope, headers http.Header) error {
 	// Encode the data to JSON, return error if there was one.
 	// Use the MarshalIndent instead of Marshal to print the output json
 	// in terminal pretier.

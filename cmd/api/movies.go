@@ -23,7 +23,7 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 		Genres:    []string{"drama", "romanc", "war"},
 		Version:   1,
 	}
-	if err := app.writeJSON(w, http.StatusOK, movie, nil); err != nil {
+	if err := app.writeJSON(w, http.StatusOK, envelope{"movie": movie}, nil); err != nil {
 		app.logger.Println(err)
 		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
 	}
