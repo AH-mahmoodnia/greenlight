@@ -7,7 +7,10 @@ type Movie struct {
 	CreatedAt time.Time `json:"-"`
 	Title     string    `json:"title"`
 	Year      int32     `json:"year,omitempty"`
-	Runtime   int32     `json:"runtime,omitempty,string"`
-	Genres    []string  `json:"genres,omitempty"`
-	Version   int32     `json:"version"`
+	// if the Runtime field has the underlying value 0 then
+	// the omitempty make it considered to be empty and the MarshalJSON
+	// won't even be called at all.
+	Runtime Runtime  `json:"runtime,omitempty"`
+	Genres  []string `json:"genres,omitempty"`
+	Version int32    `json:"version"`
 }
