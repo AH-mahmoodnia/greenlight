@@ -15,8 +15,13 @@ func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Reques
 
 // Shows the details of the specified movie in the GET /v1/movies/:id endpoint.
 func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request) {
+	id, err := app.ReadNthIDParam(r, 0)
+	if err != nil {
+		app.notFoundResponse(w, r)
+	}
+
 	movie := data.Movie{
-		ID:        1,
+		ID:        id,
 		CreatedAt: time.Now(),
 		Title:     "Casablanca",
 		Runtime:   102,
@@ -24,7 +29,6 @@ func (app *application) showMovieHandler(w http.ResponseWriter, r *http.Request)
 		Version:   1,
 	}
 	if err := app.writeJSON(w, http.StatusOK, envelope{"movie": movie}, nil); err != nil {
-		app.logger.Println(err)
-		http.Error(w, "The server encountered a problem and could not process your request", http.StatusInternalServerError)
+		app.serverErrorResponse(w, r, err)
 	}
 }

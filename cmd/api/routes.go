@@ -53,9 +53,11 @@ func (app *application) routes() http.HandlerFunc {
 		}
 		if len(allow) > 0 {
 			w.Header().Set("Allow", strings.Join(allow, ", "))
-			http.Error(w, "405 method not allowed", http.StatusMethodNotAllowed)
+			//http.Error(w, "405 method not allowed", http.StatusMethodNotAllowed)
+			app.methodNotAllowedResponse(w, r)
 			return
 		}
-		http.NotFound(w, r)
+		//http.NotFound(w, r)
+		app.notFoundResponse(w, r)
 	}
 }
