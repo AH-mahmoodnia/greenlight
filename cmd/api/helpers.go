@@ -3,6 +3,8 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
+	"io"
 	"net/http"
 	"strconv"
 )
@@ -45,5 +47,42 @@ func (app *application) writeJSON(w http.ResponseWriter, status int, data envelo
 	w.WriteHeader(status)
 	w.Write(js)
 
+	return nil
+}
+
+func (app *application) readJSON(w http.ResponseWriter, r *http.Request, dst interface{}) error {
+	if err := json.NewDecoder(r.Body).Decode(&dst); err != nil {
+		var syntaxError *json.SyntaxError
+		var unmarshalTypeError *json.UnmarshalTypeError
+		var invalidUnmarshalError *json.InvalidUnmarshalError
+
+		switch {
+		// check whether the error has the type *json.SyntaxError.
+		case errors.As(err, &syntaxError):
+			return fmt.Errorf("body contains badly-formed JSON (at character %d)", syntaxError.Offset)
+
+		// if the syntaxError leads to returning EOF then.
+		case errors.Is(err, io.ErrUnexpectedEOF):
+			return errors.New("body contains badly-formed JSON")
+		// This occur when the JSON value is the wrong type for the target destination.
+		// If error relates to a specific field, we include that too.
+		case errors.As(err, &unmarshalTypeError):
+			if unmarshalTypeError.Field != "" {
+				return fmt.Errorf("body contains incorrect JSON type for field %q", unmarshalTypeError.Field)
+			}
+			return fmt.Errorf("body contains incorrect JSON type (at character %d)", unmarshalTypeError.Offset)
+		case errors.Is(err, io.EOF):
+			return errors.New("body must not be empty")
+
+		// In case the request body is empty.
+		case errors.Is(err, io.EOF):
+			return errors.New("body must not be empty.")
+		// In case the invalid non-nil pointer passed to the Decode function.
+		case errors.As(err, &invalidUnmarshalError):
+			panic(err)
+		default:
+			return err
+		}
+	}
 	return nil
 }
