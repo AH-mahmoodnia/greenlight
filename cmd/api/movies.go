@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"net/http"
 	"time"
@@ -10,7 +11,24 @@ import (
 
 // a movie handler for POST /v1/movies endpoint.
 func (app *application) createMovieHandler(w http.ResponseWriter, r *http.Request) {
-	fmt.Fprintln(w, "Create a new movies")
+	// Decalre an anonymous struct to hold the information we expect to get from client.
+	var input struct {
+		Title   string   `json:"title"`
+		Year    int32    `json:"year"`
+		Runtime int32    `json:"runtime"`
+		Genres  []string `json:"genres"`
+	}
+
+	// Initialize a new Decoder which reads the body of request and
+	// decode it into the input struct. In case of error during decode
+	// it returns the 400 badrequest through our errorResponse function.
+	if err := json.NewDecoder(r.Body).Decode(&input); err != nil {
+		app.errorResponse(w, r, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	// Dump the input struct in HTTP response.
+	fmt.Fprintf(w, "%+v\n", input)
 }
 
 // Shows the details of the specified movie in the GET /v1/movies/:id endpoint.
