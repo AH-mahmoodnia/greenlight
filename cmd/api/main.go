@@ -23,7 +23,10 @@ type config struct {
 	port int
 	env  string
 	db   struct {
-		dsn string
+		dsn          string
+		maxOpenConns int
+		maxIdleConns int
+		maxIdleTime  string
 	}
 }
 
@@ -34,17 +37,17 @@ type application struct {
 }
 
 func main() {
-	// Declare an instance of config struct.
 	var cfg config
 
-	//Read the value of port and env from command-line and put it into
-	//our config struct.
 	flag.IntVar(&cfg.port, "port", 4000, "API server port")
 	flag.StringVar(&cfg.env, "env", "development", "Environment (development|staging|production)")
 	flag.StringVar(&cfg.db.dsn, "db-dsn", os.Getenv("GREENLIGHT_DB_DSN"), "Postgresql DSN")
+	flag.IntVar(&cfg.db.maxOpenConns, "db-max-open-conns", 50, "Postgresql max open connections")
+	flag.IntVar(&cfg.db.maxIdleConns, "db-max-idle-conns", 50, "Postgresql max idle connections")
+	flag.StringVar(&cfg.db.maxIdleTime, "db-max-idle-time", "15m", "Postgresql max connection idle time")
+
 	flag.Parse()
 
-	// simple logger which write into stdout and prefix with local date and time.
 	logger := log.New(os.Stdout, "", log.Ldate|log.Ltime)
 
 	db, err := openDB(cfg)
@@ -55,12 +58,11 @@ func main() {
 
 	logger.Printf("database connection pool established.")
 
-	// Declare an instance of application struct and fill the config and logger fields of it.
 	app := &application{
 		config: cfg,
 		logger: logger,
 	}
-	//Decalre a server and fill the fileds with above variables.
+
 	srv := &http.Server{
 		Addr:         fmt.Sprintf(":%d", cfg.port),
 		Handler:      app.routes(),
@@ -69,7 +71,6 @@ func main() {
 		WriteTimeout: 30 * time.Second,
 	}
 
-	// Start the HTTP server and log it on stdout.
 	logger.Printf("starting %s server on %d", cfg.env, cfg.port)
 	err = srv.ListenAndServe()
 	logger.Fatal(err)
@@ -80,6 +81,15 @@ func openDB(cfg config) (*sql.DB, error) {
 	if err != nil {
 		return nil, err
 	}
+
+	db.SetMaxOpenConns(cfg.db.maxOpenConns)
+	db.SetMaxIdleConns(cfg.db.maxIdleConns)
+
+	duration, err := time.ParseDuration(cfg.db.maxIdleTime)
+	if err != nil {
+		return nil, err
+	}
+	db.SetConnMaxLifetime(duration)
 
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
