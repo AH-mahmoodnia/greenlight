@@ -93,6 +93,18 @@ func (app *application) partialyUpdateMovieHandler(w http.ResponseWriter, r *htt
 		}
 		return
 	}
+
+	/* it's not neccessary:
+	// If the request contains a X-Expected-Version header, verfiy that the movie
+	// version in the database matches the expected version specified in the header.
+	if r.Header.Get("X-Expected-Version") != "" {
+		if strconv.FormatInt(int64(movie.Version), 32) != r.Header.Get("X-Expected-Version") {
+			app.editConflictResponse(w, r)
+			return
+		}
+	}
+	*/
+
 	var input struct {
 		Title   *string       `json:"title"`
 		Year    *int32        `json:"year"`
