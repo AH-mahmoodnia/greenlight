@@ -36,7 +36,7 @@ func (app *application) routes() http.HandlerFunc {
 		newRoute(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler),
 		newRoute(http.MethodPost, "/v1/movies", app.createMovieHandler),
 		newRoute(http.MethodGet, "/v1/movies/(-?[0-9]+)", app.showMovieHandler),
-		newRoute(http.MethodPut, "/v1/movies/(-?[0-9]+)", app.updateMovieHandler),
+		newRoute(http.MethodPatch, "/v1/movies/(-?[0-9]+)", app.partialyUpdateMovieHandler),
 		newRoute(http.MethodDelete, "/v1/movies/(-?[0-9]+)", app.deleteMovieHandler),
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
