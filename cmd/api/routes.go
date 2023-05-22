@@ -38,6 +38,7 @@ func (app *application) routes() http.HandlerFunc {
 		newRoute(http.MethodGet, "/v1/movies/(-?[0-9]+)", app.showMovieHandler),
 		newRoute(http.MethodPatch, "/v1/movies/(-?[0-9]+)", app.partialyUpdateMovieHandler),
 		newRoute(http.MethodDelete, "/v1/movies/(-?[0-9]+)", app.deleteMovieHandler),
+		newRoute(http.MethodGet, "/v1/movies", app.listMoviesHandler),
 	}
 	return func(w http.ResponseWriter, r *http.Request) {
 		var allow []string
