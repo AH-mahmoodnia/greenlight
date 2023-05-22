@@ -83,7 +83,7 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 		app.notFoundResponse(w, r)
 		return
 	}
-	movie, err := app.models.Movies.Get(id)
+	/*movie, err := app.models.Movies.Get(id)
 	if err != nil {
 		switch {
 		case errors.Is(err, data.ErrRecordNotFound):
@@ -92,7 +92,7 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 			app.serverErrorResponse(w, r, err)
 		}
 		return
-	}
+	}*/
 	var input struct {
 		Title   string       `json:"title"`
 		Year    int32        `json:"year"`
@@ -103,20 +103,22 @@ func (app *application) updateMovieHandler(w http.ResponseWriter, r *http.Reques
 		app.badRequestResponse(w, r, err)
 		return
 	}
+	var movie data.Movie
+	movie.ID = id
 	movie.Title = input.Title
 	movie.Year = input.Year
 	movie.Runtime = input.Runtime
 	movie.Genres = input.Genres
 
 	v := validator.New()
-	data.ValidateMovie(v, movie)
+	data.ValidateMovie(v, &movie)
 
 	if !v.Valid() {
 		app.failedValidationResponse(w, r, v.Errors)
 		return
 	}
 
-	err = app.models.Movies.Update(movie)
+	err = app.models.Movies.Update(&movie)
 	if err != nil {
 		app.serverErrorResponse(w, r, err)
 		return
