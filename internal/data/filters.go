@@ -1,12 +1,34 @@
 package data
 
-import "github.com/AH-mahmoodnia/greenlight/internal/validator"
+import (
+	"strings"
+
+	"github.com/AH-mahmoodnia/greenlight/internal/validator"
+)
 
 type Filters struct {
 	Page         int
 	PageSize     int
 	Sort         string
 	SortSafeList []string
+}
+
+func (f Filters) sortColumn() string {
+	for _, safeValue := range f.SortSafeList {
+		if f.Sort == safeValue {
+			return strings.TrimPrefix(f.Sort, "-")
+		}
+	}
+	// the f.Sort value is already been checked by the ValidateFilters().
+	// sensible failsafe to stop sql-injection
+	panic("unsafe sort parameter: " + f.Sort)
+}
+
+func (f Filters) sortDirection() string {
+	if strings.HasPrefix(f.Sort, "-") {
+		return "DESC"
+	}
+	return "ASC"
 }
 
 func ValidateFilters(v *validator.Validator, f Filters) {
