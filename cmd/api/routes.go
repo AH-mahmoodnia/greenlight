@@ -31,7 +31,7 @@ func getParam(r *http.Request, index int) string {
 
 // Create a handler which use the above functions for creating the
 // regex table and serve them in a closure.
-func (app *application) routes() http.HandlerFunc {
+func (app *application) routes() http.Handler {
 	var routes []route = []route{
 		newRoute(http.MethodGet, "/v1/healthcheck", app.healthcheckHandler),
 		newRoute(http.MethodPost, "/v1/movies", app.createMovieHandler),
@@ -40,7 +40,7 @@ func (app *application) routes() http.HandlerFunc {
 		newRoute(http.MethodDelete, "/v1/movies/(-?[0-9]+)", app.deleteMovieHandler),
 		newRoute(http.MethodGet, "/v1/movies", app.listMoviesHandler),
 	}
-	return func(w http.ResponseWriter, r *http.Request) {
+	router := http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		var allow []string
 		for _, route := range routes {
 			matches := route.regex.FindStringSubmatch(r.URL.Path)
@@ -56,11 +56,10 @@ func (app *application) routes() http.HandlerFunc {
 		}
 		if len(allow) > 0 {
 			w.Header().Set("Allow", strings.Join(allow, ", "))
-			//http.Error(w, "405 method not allowed", http.StatusMethodNotAllowed)
 			app.methodNotAllowedResponse(w, r)
 			return
 		}
-		//http.NotFound(w, r)
 		app.notFoundResponse(w, r)
-	}
+	})
+	return app.recoverPanic(router)
 }
