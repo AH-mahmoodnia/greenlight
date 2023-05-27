@@ -61,5 +61,5 @@ func (app *application) routes() http.Handler {
 		}
 		app.notFoundResponse(w, r)
 	})
-	return app.recoverPanic(router)
+	return app.recoverPanic(app.rateLimit(router))
 }
